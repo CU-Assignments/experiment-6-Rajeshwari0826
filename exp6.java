@@ -1,146 +1,168 @@
-// easy
-import java.util.*;
+import java.sql.*;
+import java.util.Scanner;
 
-class Employee {
-    String name;
-    int age;
-    double salary;
-
-    public Employee(String name, int age, double salary) {
-        this.name = name;
-        this.age = age;
-        this.salary = salary;
-    }
-
-    @Override
-    public String toString() {
-        return name + " | Age: " + age + " | Salary: $" + salary;
-    }
-}
-
-public class exp6 {
-    public static void main(String[] args) {
-        List<Employee> employees = new ArrayList<>();
-        employees.add(new Employee("Alice", 30, 60000));
-        employees.add(new Employee("Bob", 25, 50000));
-        employees.add(new Employee("Charlie", 35, 70000));
-
-        // Sorting by Salary using Lambda Expression
-        employees.sort((e1, e2) -> Double.compare(e1.salary, e2.salary));
-
-        // Printing sorted employees
-        System.out.println("Sorted Employees by Salary:");
-        employees.forEach(System.out::println);
+// Easy Level: Fetching Employee Data
+class EmployeeFetcher {
+    public static void fetchEmployees() {
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB", "rajeshwari", "22****rp");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM Employee")) {
+            System.out.println("EmpID | Name | Salary");
+            while (rs.next()) {
+                System.out.println(rs.getInt("EmpID") + " | " + rs.getString("Name") + " | " + rs.getDouble("Salary"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
 
+// Medium Level: CRUD Operations on Product Table
+class ProductCRUD {
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB", "username", "password");
+    }
 
-// Medium 
-import java.util.*;
-import java.util.stream.Collectors;
+    public static void createProduct(int id, String name, double price, int qty) {
+        String sql = "INSERT INTO Product (ProductID, ProductName, Price, Quantity) VALUES (?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            conn.setAutoCommit(false);
+            pstmt.setInt(1, id);
+            pstmt.setString(2, name);
+            pstmt.setDouble(3, price);
+            pstmt.setInt(4, qty);
+            pstmt.executeUpdate();
+            conn.commit();
+            System.out.println("Product added successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
+    public static void readProducts() {
+        String sql = "SELECT * FROM Product";
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            System.out.println("ProductID | Name | Price | Quantity");
+            while (rs.next()) {
+                System.out.println(rs.getInt("ProductID") + " | " + rs.getString("ProductName") + " | " + rs.getDouble("Price") + " | " + rs.getInt("Quantity"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateProduct(int id, double price) {
+        String sql = "UPDATE Product SET Price = ? WHERE ProductID = ?";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, price);
+            pstmt.setInt(2, id);
+            pstmt.executeUpdate();
+            System.out.println("Product updated successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteProduct(int id) {
+        String sql = "DELETE FROM Product WHERE ProductID = ?";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            System.out.println("Product deleted successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+// Hard Level: MVC-based Student Management System
 class Student {
-    String name;
+    int studentID;
+    String name, department;
     double marks;
 
-    public Student(String name, double marks) {
+    public Student(int studentID, String name, String department, double marks) {
+        this.studentID = studentID;
         this.name = name;
+        this.department = department;
         this.marks = marks;
     }
+}
 
-    @Override
-    public String toString() {
-        return name + " | Marks: " + marks;
+class StudentController {
+    private static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB", "username", "password");
+    }
+
+    public static void addStudent(Student student) {
+        String sql = "INSERT INTO Student (StudentID, Name, Department, Marks) VALUES (?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, student.studentID);
+            pstmt.setString(2, student.name);
+            pstmt.setString(3, student.department);
+            pstmt.setDouble(4, student.marks);
+            pstmt.executeUpdate();
+            System.out.println("Student added successfully.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void viewStudents() {
+        String sql = "SELECT * FROM Student";
+        try (Connection conn = getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
+            System.out.println("StudentID | Name | Department | Marks");
+            while (rs.next()) {
+                System.out.println(rs.getInt("StudentID") + " | " + rs.getString("Name") + " | " + rs.getString("Department") + " | " + rs.getDouble("Marks"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
 
-public class exp6 {
+// Main class to run the program
+public class Main {
     public static void main(String[] args) {
-        List<Student> students = Arrays.asList(
-            new Student("Alice", 85.5),
-            new Student("Bob", 72.0),
-            new Student("Charlie", 78.2),
-            new Student("David", 90.0),
-            new Student("Eve", 65.4)
-        );
-
-        // Filtering students scoring above 75% and sorting by marks
-        List<Student> topStudents = students.stream()
-            .filter(s -> s.marks > 75)
-            .sorted((s1, s2) -> Double.compare(s2.marks, s1.marks))
-            .collect(Collectors.toList());
-
-        // Displaying the students
-        System.out.println("Students Scoring Above 75% (Sorted by Marks):");
-        topStudents.forEach(System.out::println);
-    }
-}
-
-
-
-
-// hard
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-class Product {
-    String name;
-    String category;
-    double price;
-
-    public Product(String name, String category, double price) {
-        this.name = name;
-        this.category = category;
-        this.price = price;
-    }
-
-    @Override
-    public String toString() {
-        return name + " | Category: " + category + " | Price: $" + price;
-    }
-}
-
-public class exp6 {
-    public static void main(String[] args) {
-        List<Product> products = Arrays.asList(
-            new Product("Laptop", "Electronics", 1200.0),
-            new Product("Smartphone", "Electronics", 800.0),
-            new Product("TV", "Electronics", 1500.0),
-            new Product("Shirt", "Clothing", 50.0),
-            new Product("Jeans", "Clothing", 80.0),
-            new Product("Refrigerator", "Appliances", 1000.0),
-            new Product("Washing Machine", "Appliances", 700.0),
-            new Product("Sneakers", "Footwear", 120.0)
-        );
-
-        // Grouping products by category
-        Map<String, List<Product>> groupedByCategory = products.stream()
-            .collect(Collectors.groupingBy(p -> p.category));
-
-        // Finding the most expensive product in each category
-        Map<String, Product> mostExpensiveByCategory = products.stream()
-            .collect(Collectors.toMap(
-                p -> p.category, // Key: Category
-                p -> p, // Value: Product
-                (p1, p2) -> p1.price > p2.price ? p1 : p2 
-            ));
-        double averagePrice = products.stream()
-            .mapToDouble(p -> p.price)
-            .average()
-            .orElse(0.0);
-
-        // Display Results
-        System.out.println("Products Grouped by Category:");
-        groupedByCategory.forEach((category, prodList) -> {
-            System.out.println(category + ": " + prodList);
-        });
-
-        System.out.println("\nMost Expensive Product in Each Category:");
-        mostExpensiveByCategory.forEach((category, product) -> {
-            System.out.println(category + ": " + product);
-        });
-
-        System.out.println("\nAverage Price of All Products: $" + averagePrice);
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            System.out.println("1. Fetch Employees\n2. Product CRUD\n3. Student Management\n4. Exit");
+            int choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    EmployeeFetcher.fetchEmployees();
+                    break;
+                case 2:
+                    System.out.println("1. Add Product\n2. View Products\n3. Update Product\n4. Delete Product");
+                    int prodChoice = scanner.nextInt();
+                    if (prodChoice == 1) {
+                        System.out.print("Enter ID, Name, Price, Quantity: ");
+                        ProductCRUD.createProduct(scanner.nextInt(), scanner.next(), scanner.nextDouble(), scanner.nextInt());
+                    } else if (prodChoice == 2) {
+                        ProductCRUD.readProducts();
+                    } else if (prodChoice == 3) {
+                        System.out.print("Enter Product ID and New Price: ");
+                        ProductCRUD.updateProduct(scanner.nextInt(), scanner.nextDouble());
+                    } else if (prodChoice == 4) {
+                        System.out.print("Enter Product ID to Delete: ");
+                        ProductCRUD.deleteProduct(scanner.nextInt());
+                    }
+                    break;
+                case 3:
+                    System.out.println("1. Add Student\n2. View Students");
+                    int stuChoice = scanner.nextInt();
+                    if (stuChoice == 1) {
+                        System.out.print("Enter ID, Name, Department, Marks: ");
+                        StudentController.addStudent(new Student(scanner.nextInt(), scanner.next(), scanner.next(), scanner.nextDouble()));
+                    } else if (stuChoice == 2) {
+                        StudentController.viewStudents();
+                    }
+                    break;
+                case 4:
+                    System.exit(0);
+                default:
+                    System.out.println("Invalid Choice");
+            }
+        }
     }
 }
