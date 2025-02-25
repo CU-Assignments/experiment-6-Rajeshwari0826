@@ -20,7 +20,7 @@ class EmployeeFetcher {
 // Medium Level: CRUD Operations on Product Table
 class ProductCRUD {
     private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB", "username", "password");
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB", "rajeshwari", "22****rp");
     }
 
     public static void createProduct(int id, String name, double price, int qty) {
@@ -91,7 +91,7 @@ class Student {
 
 class StudentController {
     private static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB", "username", "password");
+        return DriverManager.getConnection("jdbc:mysql://localhost:3306/yourDB","rajeshwari", "22****rp");
     }
 
     public static void addStudent(Student student) {
